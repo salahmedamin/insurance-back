@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model entreprise{
+  id    Int     @id @default(autoincrement())
+  matFiscal BigInt @db.BigInt @unique
+  nom String
+  adresse String
+  tel BigInt @db.BigInt @unique
+  contrat contrat[]
+  account account_entrep?
+  listeAssure assure[]
+}
+
+model contract_offer{
+  id Int @id @default(autoincrement())
+  name String
+  remboursement Int
+  contrat contrat[]
+  plafond Int
+}
+
+model contrat {
+  id    Int     @id @default(autoincrement())
+  unique String  @unique
+  start  DateTime @default(now())
+  end BigInt @db.BigInt
+  offer contract_offer? @relation(fields: [offerID],references:[id])
+  offerID Int
+  entreprise entreprise? @relation(fields: [entID],references:[id])
+  entID Int
+  insured assure[]
+  bulletin bulletin[]
+  actes acte_medical[]
+}
+
+model assure{
+  id    Int     @id @default(autoincrement())
+  matricule BigInt @db.BigInt @unique
+  nom String
+  prenom String
+  sexe String
+  dateNaiss String
+  contract contrat? @relation(fields: [cID],references:[id])
+  cID Int
+  sousassure sousassure[]
+  account account_assure?
+  entreprise entreprise @relation(fields: [entID],references:[id])
+  entID Int
+  bulletins bulletin[]
+}
+
+model sousassure{
+  id    Int     @id @default(autoincrement())
+  matricule BigInt @db.BigInt @unique
+  nom String
+  prenom String
+  sexe String
+  dateNaiss String
+  insurer assure @relation(fields: [insurerID],references:[id])
+  insurerID Int
+  lienParente Int
+  bulletins bulletin[]
+  account account_sousassure?
+}
+
+model intervenant{
+  id Int     @id @default(autoincrement())
+  CNAM BigInt @db.BigInt @unique
+  nom String
+  prenom String
+  bulletin bulletin[]
+}
+
+model acte_medical {
+  id Int     @id @default(autoincrement())
+  code Int @unique
+  nom String
+  bulletin bulletin[]
+  contrat contrat[]
+}
+
+model reject_cause{
+  id Int @id @default(autoincrement())
+  statuts statut_bulletin[]
+  code Int @unique
+  libelle String
+}
+
+model cheque{
+  id Int @id @default(autoincrement())
+  numCh BigInt @db.BigInt @unique
+  bank String
+  mthd remboursement? @relation(fields: [idPaim],references:[id])
+  idPaim Int
+}
+
+model virement{
+  id Int @id @default(autoincrement())
+  numVir BigInt @db.BigInt @unique
+  numComp BigInt @db.BigInt
+  mthd remboursement? @relation(fields: [idPaim],references:[id])
+  idPaim Int
+}
+
+model recu{
+  id Int @id @default(autoincrement())
+  mthd remboursement? @relation(fields: [idPaim],references:[id])
+  idPaim Int
+}
+
+
+model remboursement{
+  id Int @id @default(autoincrement())
+  date DateTime @default(now())
+  bulletin bulletin?
+  cheque cheque?
+  virement virement?
+  recu recu?
+}
+
+model statut_bulletin{
+  id Int @id @default(autoincrement())
+  status Int @default(0)//0 pending 1 validated -1 rejected
+  bulletin bulletin? @relation(fields: [bID],references:[id])
+  bID Int @unique
+  reject reject_cause? @relation(fields: [rejID],references:[id])
+  rejID Int?
+}
+
+model bulletin{
+  id Int     @id @default(autoincrement())
+  unique String @unique
+  contract contrat? @relation(fields: [cID],references:[id])
+  intervenant intervenant? @relation(fields: [intervID],references:[id])
+  insured sousassure? @relation(fields: [idSousAss],references:[id])
+  assure assure? @relation(fields: [idAssure],references:[id])
+  actemedical acte_medical? @relation(fields: [actID],references:[id])
+  remboursement remboursement? @relation(fields: [rembID],references:[id])
+  idSousAss Int?
+  idAssure Int?
+  cID Int
+  intervID Int?
+  actID Int?
+  statut statut_bulletin?
+  rembID Int?
+  date DateTime @default(now())
+  montant BigInt? @db.BigInt
+}
+
+model account_entrep{
+  id Int @id @default(autoincrement())
+  generatedUsername String @unique
+  generatedPassword String
+  entreprise entreprise? @relation(fields: [entID],references:[id])
+  entID Int @unique
+}
+
+model account_assure{
+  id Int @id @default(autoincrement())
+  generatedUsername String @unique
+  generatedPassword String
+  assure assure? @relation(fields: [assID],references:[id])
+  assID Int @unique
+  changedPass Boolean @default(false)
+}
+
+model account_sousassure{
+  id Int @id @default(autoincrement())
+  generatedUsername String @unique
+  generatedPassword String
+  assure sousassure? @relation(fields: [sousAssID],references:[id])
+  sousAssID Int @unique
+  changedPass Boolean @default(false)
+}
+
+model blacklist_token{
+  id Int @id @default(autoincrement())
+  token String @db.VarChar(400) @unique
+}

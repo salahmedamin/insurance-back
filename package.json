@@ -1,0 +1,29 @@
+{
+  "name": "infoplus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^2.23.0",
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "is-express-schema-valid": "^1.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "secure-random-password": "^0.2.2",
+    "uuid": "^8.3.2"
+  },
+  "prisma": {
+    "schema": "./db/schema.prisma"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7",
+    "prisma": "^2.23.0"
+  }
+}
